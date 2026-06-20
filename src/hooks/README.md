@@ -3,4 +3,5 @@
 This file ensures the `hooks` directory is tracked by Git, as Git does not track empty directories.
 
 ## Directory Purpose
+
 The `hooks` directory contains all hook function files that handle client-side operations in the application.
