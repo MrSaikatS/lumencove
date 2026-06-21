@@ -53,47 +53,66 @@ See existing examples under `src/components/Auth/`.
 ## Stack at a glance
 
 - Next.js 16.2 + React 19.2 (App Router, Turbopack default, React Compiler on, `typedRoutes` on)
-- Prisma 7 with `@prisma/adapter-libsql` (SQLite, file-backed)
+- Prisma 7 with `@prisma/adapter-neon` (PostgreSQL, Neon serverless driver)
 - Tailwind CSS v4 (CSS-only config in `globals.css`; no `tailwind.config.ts`)
 - shadcn/ui with the `base-luma` style preset; primitives from `@base-ui/react` (not Radix)
 - `next-themes` (default `dark`, `enableSystem={false}`), `react-toastify`, `lucide-react`
 - `@t3-oss/env-nextjs` + Zod for env validation
+- Better Auth for authentication
 
 ## Verification
 
 - **Primary check**: `bun lint` — runs `eslint` with `eslint-config-next` core-web-vitals + typescript.
-- **Secondary / type gate**: `bun run build`. There is no separate `typecheck` script and no test framework; TypeScript errors surface only during the build.
-- **Full prod check**: `bun prod` — `prisma generate && eslint && next build && next start`. Use before schema or env changes.
+- **Full build (prisma + ts)**: `bun run build` — runs `prisma generate && next build`. TypeScript errors surface only during build (no separate typecheck script; no test framework).
+- **`bun prod` runs `next build && next start`** — does NOT run prisma generate or eslint. If schema changed, run `bun run build` first.
 
-## Prisma (Prisma 7, custom output)
+## Prisma (Prisma 7, PostgreSQL + Neon)
 
-- Generator: `provider = "prisma-client"`, `output = "../generated/prisma"`. This is the Prisma 7 generator, **not** `prisma-client-js`.
-- Import the client as `import { PrismaClient } from "@generated/prisma/client"`. There is no `@prisma/client` import surface in this repo.
-- `prisma/schema.prisma` has **no** `datasource.url` line. The URL comes from `prisma.config.ts` via `env("DATABASE_URL")` (loaded with `dotenv/config`). Do not add it back inline.
-- `src/lib/database/dbClient.ts` is a `globalThis` singleton (HMR-safe) wired to `PrismaLibSql`. Do not instantiate `PrismaClient` elsewhere; import from this file.
-- `serverEnv.DATABASE_URL` is Zod-validated to start with `file:./` (`src/lib/env/serverEnv.ts`). A non-`file:./` URL throws at boot.
-- No migrations exist yet — `bun migrate` (`prisma migrate dev && prisma generate`) creates `prisma/migrations/`. Schema edits go through that command, not `prisma db push`.
-- `bun studio` runs headless (`--browser none`); open the printed URL in a browser manually.
-- `generated/**` is gitignored and excluded from ESLint. Do not hand-edit generated files.
-- `build` and `prod` scripts prepend `prisma generate` — running raw `next build` will fail with missing types if the client is stale.
+- Schema at `prisma/schema.prisma`. Generator: `provider = "prisma-client"` (Prisma 7 syntax, not `prisma-client-js`). Output to `../generated/prisma`.
+- Import client as `import { PrismaClient } from "@generated/prisma/client"`. No `@prisma/client` import surface.
+- **No `datasource.url` in schema.** The Prisma CLI URL comes from `prisma.config.ts` via `env("DIRECT_URL")`. The runtime adapter URL comes from `src/lib/database/dbClient.ts` using `serverEnv.DATABASE_URL`.
+- Runtime uses `@prisma/adapter-neon` (Neon serverless driver for PostgreSQL). `dbClient.ts` is a `globalThis` singleton (HMR-safe). Do not instantiate `PrismaClient` elsewhere.
+- `serverEnv.DATABASE_URL` validated to start with `postgresql://`. Both `DATABASE_URL` and `DIRECT_URL` are required env vars.
+- No migrations exist yet — `bun migrate` (`prisma migrate dev && prisma generate`) creates `prisma/migrations/`. Use this for schema changes, not `prisma db push`.
+- `bun studio` runs headless (`--browser none`); open the printed URL manually.
+- `generated/**` is gitignored and excluded from ESLint. Do not hand-edit.
+- Both `build` and `migrate` scripts prepend `prisma generate` — running raw `next build` will fail with stale generated types.
 
 ## Env validation (T3 env)
 
-- `src/lib/env/clientEnv.ts` and `src/lib/env/serverEnv.ts` define Zod schemas via `@t3-oss/env-nextjs`.
-- `serverEnv.ts` uses `experimental__runtimeEnv: process.env`. The `experimental__` prefix is required for non-Next-runtime access — keep it verbatim.
-- `next.config.ts` imports both env files **as side effects** at the top of the module to trigger validation at load time. Do not remove those imports; the rest of the app reads `serverEnv` / `clientEnv` from those modules.
-- New vars: add to `serverEnv.ts` (server) or `clientEnv.ts` (must be `NEXT_PUBLIC_*`) and mirror in `.env.example`.
+- `src/lib/env/serverEnv.ts` and `src/lib/env/clientEnv.ts` define Zod schemas via `@t3-oss/env-nextjs`.
+- `serverEnv.ts` uses `experimental__runtimeEnv: process.env` — keep this prefix verbatim.
+- `next.config.ts` imports both env files **as side effects** at the top to trigger validation at load time. Do not remove these imports.
+- New vars: add to `serverEnv.ts` (server, non-`NEXT_PUBLIC_*`) or `clientEnv.ts` (must be `NEXT_PUBLIC_*`), then mirror in `.env.example`.
+- Required env: `DATABASE_URL`, `DIRECT_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`. Optional: `BETTER_AUTH_ALLOWED_ORIGINS`, `BETTER_AUTH_TELEMETRY`, S3 vars, `CHECKPOINT_DISABLE`.
 
 ## Styling
 
-- Tailwind v4: all config lives in `src/app/globals.css` via `@theme` and `@custom-variant`. PostCSS plugin is `@tailwindcss/postcss`. There is no `tailwind.config.ts` — do not create one.
-- `globals.css` imports `shadcn/tailwind.css`; removing it breaks the Base Luma design tokens.
-- Prettier: `singleAttributePerLine: true`, `bracketSameLine: true`, `experimentalTernaries: true`, and `prettier-plugin-tailwindcss` is enabled. New code matches (one prop per line; JSX closing bracket on the same line as the tag).
+- Tailwind v4: all config lives in `src/app/globals.css` via `@theme` and `@custom-variant`. PostCSS plugin is `@tailwindcss/postcss`. No `tailwind.config.ts` — do not create one.
+- `globals.css` imports `shadcn/tailwind.css` and `tw-animate-css`. Removing either breaks tokens or animations.
+- Prettier: `singleAttributePerLine: true`, `bracketSameLine: true`, `experimentalTernaries: true`, `prettier-plugin-tailwindcss`. JSX props one per line, closing bracket same line.
 
 ## shadcn / Base UI
 
-- `components.json` sets `ui` → `@/components/shadcnui` (not the default `@/components/ui`). Add components with `bunx shadcn add ...`; they land in `src/components/shadcnui/`.
-- The shipped `Button` wraps `Button as ButtonPrimitive` from `@base-ui/react/button`. Do not introduce Radix or `react-aria` primitives — they don't share the Base Luma styling.
+- `components.json` sets `ui` → `@/components/shadcnui` (not default `@/components/ui`). Use `bunx shadcn add ...`; components land in `src/components/shadcnui/`.
+- Shipped `Button` wraps `Button as ButtonPrimitive` from `@base-ui/react/button`. Do not introduce Radix or `react-aria` primitives — they don't share Base Luma styling.
+
+## Better Auth
+
+- Server: `src/lib/auth.ts` — configures `betterAuth()` with email/password, email verification, admin plugin, `nextCookies()` plugin, session cookies, rate limiting, Argon2 password hashing via `@node-rs/argon2` with `BETTER_AUTH_SECRET` as secret key.
+- Client: `src/lib/auth-client.ts` — `createAuthClient()` with `inferAdditionalFields` + `adminClient()` plugins. Import as `authClient`.
+- API route: `src/app/api/auth/[...all]/route.ts` — single `{ GET, POST }` handler via `toNextJsHandler(auth.handler)`.
+- Server component session check: `auth.api.getSession({ headers: await headers() })`.
+- Client component session: `authClient.useSession()` returns `{ data, isPending, error }`.
+- Auth methods: `authClient.signIn.email(...)`, `authClient.signUp.email(...)`, `authClient.requestPasswordReset(...)`, `authClient.resetPassword(...)`.
+- Rate limits configured: sign-in 10/5min, sign-up 5/10min, reset-password 3/15min.
+
+## Auth routing layout
+
+- `(public)/` route group: home page (`/`) = login page in centered card layout. Register, forgot-password, reset-password sub-pages. Guest-accessible.
+- `(private)/` route group: layout checks session via `auth.api.getSession()` server-side and redirects to `/` if null. Also renders `Header` component.
+- Pages rendering LoginForm or RegisterForm must wrap them in `<Suspense>` (they use `useSearchParams()` for callback URL). Build fails without it.
+- Callback URL pattern: `searchParams.get("redirect") ?? "/"` passed as `callbackURL` to signIn/signUp.
 
 ## Path aliases (`tsconfig.json`)
 
@@ -102,16 +121,16 @@ See existing examples under `src/components/Auth/`.
 
 ## Reserved directories
 
-- `src/server/` — server-only modules (server actions, anything importing `server-only`). Currently a `.gitkeep`.
-- `src/hooks/` — custom React hooks. Currently a `.gitkeep`.
+- `src/server/` — server-only modules (server actions, anything importing `server-only`).
+- `src/hooks/` — custom React hooks.
 
 ## Package manager
 
-- `bun.lock` is committed; Bun is the primary workflow (`bun install`, `bun <script>`). npm works (engines pin `node >=24`, `npm >=11`) but the scripts and README are written around `bun`.
+- `bun.lock` committed; Bun is the primary workflow (`bun install`, `bun <script>`). npm works but scripts and README assume `bun`.
 
 ## Misc
 
 - ESLint ignores: `.next/**`, `out/**`, `build/**`, `next-env.d.ts`, `generated/**`.
 - `.env` is gitignored; `.env.example` is the committed template. Do not commit secrets.
-- `CHECKPOINT_DISABLE=1` is set to silence Prisma telemetry.
-- No CI workflows or pre-commit hooks exist. Pre-PR verification is `bun lint` then `bun run build` (see Verification above).
+- `CHECKPOINT_DISABLE=1` silences Prisma telemetry. `BETTER_AUTH_TELEMETRY=0` silences Better Auth telemetry.
+- No CI workflows or pre-commit hooks. Pre-PR verification: `bun lint` then `bun run build`.

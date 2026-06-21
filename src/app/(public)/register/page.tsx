@@ -9,41 +9,35 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcnui/card";
-import LoginForm from "@/components/Auth/LoginForm";
+import RegisterForm from "@/components/Auth/RegisterForm";
 
 export const metadata: Metadata = {
-  title: "Sign In",
+  title: "Create Account",
 };
 
-const LoginPage = () => {
+const RegisterPage = () => {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Welcome back</CardTitle>
+        <CardTitle>Create an account</CardTitle>
         <p className="text-muted-foreground text-sm">
-          Sign in to your account to continue
+          Get started with Lumencove
         </p>
       </CardHeader>
 
       <CardContent>
         <Suspense fallback={null}>
-          <LoginForm />
+          <RegisterForm />
         </Suspense>
       </CardContent>
 
-      <CardFooter className="flex-col gap-2">
-        <Link
-          href="/forgot-password"
-          className="text-muted-foreground text-sm underline-offset-2 hover:underline">
-          Forgot your password?
-        </Link>
-
+      <CardFooter>
         <p className="text-muted-foreground text-sm">
-          Don&apos;t have an account?{" "}
+          Already have an account?{" "}
           <Link
-            href="/register"
+            href="/"
             className="text-primary font-medium underline-offset-2 hover:underline">
-            Sign up
+            Sign in
           </Link>
         </p>
       </CardFooter>
@@ -51,4 +45,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

@@ -17,10 +17,17 @@ export const auth = betterAuth({
     transaction: true,
   }),
   plugins: [admin(), nextCookies()],
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      console.log(`[DEV] Verification email for user ${user.email}`);
+      console.log(`[DEV] Verification URL: ${url}`);
+    },
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
-    // Todo: enable email verification
     requireEmailVerification: false,
     password: {
       hash: hashPasswordFunction,
