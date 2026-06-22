@@ -26,7 +26,7 @@ const ResetPasswordPage = async (props: {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader>
+      <CardHeader className="text-center">
         <CardTitle>Reset your password</CardTitle>
         <p className="text-muted-foreground text-sm">
           Enter your new password below
@@ -37,8 +37,8 @@ const ResetPasswordPage = async (props: {
         <ResetPasswordForm token={token} />
       </CardContent>
 
-      <CardFooter>
-        <p className="text-muted-foreground text-sm">
+      <CardFooter className="justify-center">
+        <p className="text-muted-foreground text-center text-sm">
           <Link
             href="/"
             className="text-primary font-medium underline-offset-2 hover:underline">

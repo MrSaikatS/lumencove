@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const RegisterPage = () => {
   return (
     <Card className="w-full max-w-md">
-      <CardHeader>
+      <CardHeader className="text-center">
         <CardTitle>Create an account</CardTitle>
         <p className="text-muted-foreground text-sm">
           Get started with Lumencove
@@ -31,8 +31,8 @@ const RegisterPage = () => {
         </Suspense>
       </CardContent>
 
-      <CardFooter>
-        <p className="text-muted-foreground text-sm">
+      <CardFooter className="justify-center">
+        <p className="text-muted-foreground text-center text-sm">
           Already have an account?{" "}
           <Link
             href="/"

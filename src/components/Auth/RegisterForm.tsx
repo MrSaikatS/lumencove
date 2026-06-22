@@ -1,23 +1,21 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
-
 import { Field, FieldError, FieldLabel } from "@/components/shadcnui/field";
 import { Input } from "@/components/shadcnui/input";
 import { authClient } from "@/lib/auth-client";
 import { registerFormSchema, type RegisterFormType } from "@/lib/zodSchema";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { Button } from "../shadcnui/button";
 
 const RegisterForm = () => {
-  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const searchParams = useSearchParams();
 
   const {
     handleSubmit,
@@ -48,6 +46,7 @@ const RegisterForm = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
+      className="grid gap-4"
       noValidate>
       <Controller
         name="name"
@@ -153,9 +152,7 @@ const RegisterForm = () => {
 
       <Button
         type="submit"
-        disabled={isSubmitting}
-        className="mt-6 w-full"
-        size="lg">
+        disabled={isSubmitting}>
         {isSubmitting && (
           <LoaderCircle
             size={18}

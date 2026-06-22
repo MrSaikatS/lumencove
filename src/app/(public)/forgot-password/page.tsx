@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 const ForgotPasswordPage = () => {
   return (
     <Card className="w-full max-w-md">
-      <CardHeader>
+      <CardHeader className="text-center">
         <CardTitle>Forgot password</CardTitle>
         <p className="text-muted-foreground text-sm">
           We&apos;ll send you a link to reset it
@@ -28,8 +28,8 @@ const ForgotPasswordPage = () => {
         <ForgotPasswordForm />
       </CardContent>
 
-      <CardFooter>
-        <p className="text-muted-foreground text-sm">
+      <CardFooter className="justify-center">
+        <p className="text-muted-foreground text-center text-sm">
           Remember your password?{" "}
           <Link
             href="/"

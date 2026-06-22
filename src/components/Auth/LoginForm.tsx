@@ -1,22 +1,21 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
-
+import { Checkbox } from "@/components/shadcnui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/shadcnui/field";
 import { Input } from "@/components/shadcnui/input";
 import { authClient } from "@/lib/auth-client";
 import { loginFormSchema, type LoginFormType } from "@/lib/zodSchema";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { Button } from "../shadcnui/button";
 
 const LoginForm = () => {
-  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
 
   const {
     handleSubmit,
@@ -47,6 +46,7 @@ const LoginForm = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
+      className="grid gap-4"
       noValidate>
       <Controller
         name="email"
@@ -103,11 +103,10 @@ const LoginForm = () => {
         control={control}
         render={({ field }) => (
           <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={field.value}
-              onChange={field.onChange}
-              className="accent-primary size-4"
+              onCheckedChange={field.onChange}
+              className={"cursor-pointer"}
             />
             Remember me
           </label>
@@ -116,9 +115,7 @@ const LoginForm = () => {
 
       <Button
         type="submit"
-        disabled={isSubmitting}
-        className="mt-6 w-full"
-        size="lg">
+        disabled={isSubmitting}>
         {isSubmitting && (
           <LoaderCircle
             size={18}

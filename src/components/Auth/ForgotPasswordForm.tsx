@@ -1,16 +1,14 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, MailCheck } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
-
 import { Field, FieldError, FieldLabel } from "@/components/shadcnui/field";
 import { Input } from "@/components/shadcnui/input";
 import { authClient } from "@/lib/auth-client";
 import { forgotPasswordSchema, type ForgotPasswordType } from "@/lib/zodSchema";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoaderCircle, MailCheck } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { Button } from "../shadcnui/button";
 
 const ForgotPasswordForm = () => {
@@ -58,8 +56,9 @@ const ForgotPasswordForm = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
+      className="grid gap-4"
       noValidate>
-      <p className="text-muted-foreground mb-6 text-sm">
+      <p className="text-muted-foreground text-sm">
         Enter your email and we&apos;ll send you a link to reset your password.
       </p>
 
@@ -84,9 +83,7 @@ const ForgotPasswordForm = () => {
 
       <Button
         type="submit"
-        disabled={isSubmitting}
-        className="mt-6 w-full"
-        size="lg">
+        disabled={isSubmitting}>
         {isSubmitting && (
           <LoaderCircle
             size={18}

@@ -134,3 +134,13 @@ See existing examples under `src/components/Auth/`.
 - `.env` is gitignored; `.env.example` is the committed template. Do not commit secrets.
 - `CHECKPOINT_DISABLE=1` silences Prisma telemetry. `BETTER_AUTH_TELEMETRY=0` silences Better Auth telemetry.
 - No CI workflows or pre-commit hooks. Pre-PR verification: `bun lint` then `bun run build`.
+
+## Git commits
+
+Use PowerShell here-strings:
+
+```powershell
+git commit -m @"
+commit message here
+"@
+```

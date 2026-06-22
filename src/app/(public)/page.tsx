@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const LoginPage = () => {
   return (
     <Card className="w-full max-w-md">
-      <CardHeader>
+      <CardHeader className="text-center">
         <CardTitle>Welcome back</CardTitle>
         <p className="text-muted-foreground text-sm">
           Sign in to your account to continue
@@ -31,14 +31,14 @@ const LoginPage = () => {
         </Suspense>
       </CardContent>
 
-      <CardFooter className="flex-col gap-2">
+      <CardFooter className="flex-col justify-center gap-2">
         <Link
           href="/forgot-password"
           className="text-muted-foreground text-sm underline-offset-2 hover:underline">
           Forgot your password?
         </Link>
 
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
